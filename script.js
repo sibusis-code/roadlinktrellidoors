@@ -23,6 +23,7 @@ const quoteForm = document.getElementById("quoteForm");
 const quoteStatus = document.getElementById("quoteStatus");
 const chatToggle = document.getElementById("chatToggle");
 const chatPanel = document.getElementById("chatPanel");
+const chatClose = document.getElementById("chatClose");
 const chatMessages = document.getElementById("chatMessages");
 const chatForm = document.getElementById("chatForm");
 const chatInput = document.getElementById("chatInput");
@@ -180,15 +181,32 @@ function toggleChatPanel() {
   const isHidden = chatPanel.hasAttribute("hidden");
 
   if (isHidden) {
-    chatPanel.removeAttribute("hidden");
-    chatToggle.setAttribute("aria-expanded", "true");
-    if (chatInput) {
-      chatInput.focus();
-    }
+    openChatPanel();
   } else {
-    chatPanel.setAttribute("hidden", "");
-    chatToggle.setAttribute("aria-expanded", "false");
+    closeChatPanel();
   }
+}
+
+function openChatPanel() {
+  if (!chatPanel || !chatToggle) {
+    return;
+  }
+
+  chatPanel.removeAttribute("hidden");
+  chatToggle.setAttribute("aria-expanded", "true");
+
+  if (chatInput) {
+    chatInput.focus();
+  }
+}
+
+function closeChatPanel() {
+  if (!chatPanel || !chatToggle) {
+    return;
+  }
+
+  chatPanel.setAttribute("hidden", "");
+  chatToggle.setAttribute("aria-expanded", "false");
 }
 
 function getHeaderOffset() {
@@ -286,9 +304,32 @@ if (chatToggle) {
   chatToggle.addEventListener("click", toggleChatPanel);
 }
 
+if (chatClose) {
+  chatClose.addEventListener("click", closeChatPanel);
+}
+
 if (chatForm) {
   chatForm.addEventListener("submit", handleChatSubmit);
 }
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeChatPanel();
+  }
+});
+
+document.addEventListener("click", (event) => {
+  if (!chatPanel || chatPanel.hasAttribute("hidden")) {
+    return;
+  }
+
+  const clickedInsidePanel = chatPanel.contains(event.target);
+  const clickedToggle = chatToggle ? chatToggle.contains(event.target) : false;
+
+  if (!clickedInsidePanel && !clickedToggle) {
+    closeChatPanel();
+  }
+});
 
 buildGallery();
 enableSmoothAnchorScroll();
