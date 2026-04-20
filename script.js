@@ -191,14 +191,35 @@ function toggleChatPanel() {
   }
 }
 
+function getHeaderOffset() {
+  if (!siteHeader) {
+    return 0;
+  }
+
+  const style = window.getComputedStyle(siteHeader);
+  const isOverlayingHeader = style.position === "sticky" || style.position === "fixed";
+
+  return isOverlayingHeader ? siteHeader.offsetHeight + 10 : 0;
+}
+
 function scrollToSection(hash) {
+  if (hash === "#home") {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+
+  if (hash === "#pageBottom") {
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
+    return;
+  }
+
   const target = document.querySelector(hash);
 
   if (!target) {
     return;
   }
 
-  const headerOffset = siteHeader ? siteHeader.offsetHeight + 10 : 0;
+  const headerOffset = getHeaderOffset();
   const targetTop = target.getBoundingClientRect().top + window.scrollY - headerOffset;
 
   window.scrollTo({
@@ -221,6 +242,11 @@ function enableSmoothAnchorScroll() {
       const target = document.querySelector(hash);
 
       if (!target) {
+        if (hash === "#home" || hash === "#pageBottom") {
+          event.preventDefault();
+          scrollToSection(hash);
+          window.history.replaceState(null, "", hash);
+        }
         return;
       }
 
